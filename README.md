@@ -96,7 +96,7 @@ UPROGS=\
 
 ![pingpong](./doc/mit6.s081/pingpong2.jpeg)
 
-#### 3. pingpong (moderate)/(hard) [代码参考](./xv6-labs-2024/lab1:%20util/3.%primes/primes.c)
+#### 3. pingpong (moderate)/(hard) [代码参考](./xv6-labs-2024/lab1:%20util/3.%20primes/primes.c)
 
 ```
 父进程给子进程发送[2,280]的数字 子进程筛掉并打印质数
@@ -132,7 +132,7 @@ void handle() {
 
 ![primes](./doc/mit6.s081/primes2.jpeg)
 
-#### 4. find (moderate) [代码参考](./xv6-labs-2024/lab1:%20util/4.%find/find.c)
+#### 4. find (moderate) [代码参考](./xv6-labs-2024/lab1:%20util/4.%20find/find.c)
 
 ```
 实现find命令 参考user/ls.c文件
@@ -219,4 +219,30 @@ C字符串需要以\0结尾 但标准输入的原始字节流不包含\0 而是�
 - 标准输入的内容根据\n划分 然后依次执行
 ![xargs](./doc/mit6.s081/xargs.jpeg)
 
-## 2. mit6.824
+## 2. mit6.824 [syscall](https://pdos.csail.mit.edu/6.828/2024/labs/syscall.html)
+
+#### gdb使用
+
+- [在vscode上完美调试xv6指南](https://zhuanlan.zhihu.com/p/567525198)
+
+#### 1. System call tracing (moderate) [代码参考](./xv6-labs-2024/lab2:%20syscall/1.%20system%20call%20tracing)
+```
+增加trace命令 打印进程ID、系统调用名称和返回值(保存在a0)
+```
+> **为什么用a0?**
+>
+> https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/712449f8efcf6b3acd9e2a2a7ddfe89486317877/riscv-cc.adoc#integer-calling-convention
+
+#### 2. attack xv6 (moderate) [代码参考](./xv6-labs-2024/lab2:%20syscall/2.%20attack%20xv6)
+
+```
+user/attack.c 中的secret最终分配到了那个页表上
+```
+
+- 参考文章 [attack xv6](https://nosae.top/posts/attack-xv6/)
+- 查看日志 观察分配内存的0x0000000087f28000 最终是在第9页 [执行结果](./xv6-labs-2024/lab2:%20syscall/2.%20attack%20xv6/doc/执行结果.txt)
+
+```
+1. 按提示把页表清空部分都注释了
+2. 根据页表的分配知道最终使用了那一块
+```
