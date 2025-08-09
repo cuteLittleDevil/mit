@@ -1,0 +1,23 @@
+entry("fork");
+entry("exit");
+entry("wait");
+entry("pipe");
+entry("read");
+entry("write");
+entry("close");
+entry("kill");
+entry("exec");
+entry("open");
+entry("mknod");
+entry("unlink");
+entry("fstat");
+entry("link");
+entry("mkdir");
+entry("chdir");
+entry("dup");
+entry("getpid");
+entry("sbrk");
+entry("sleep");
+entry("uptime");
+// todo 按格式添加
+entry("trace");
