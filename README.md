@@ -8,7 +8,7 @@
 |--------------------|--------------------------------------------|
 | 2024实验课表              | [2024课程](https://pdos.csail.mit.edu/6.828/2024/schedule.html) |
 | MIT6.S081课程            | [mit6.s081](https://mit-public-courses-cn-translatio.gitbook.io/mit6-s081) |
-| xv6中文文档               | [xv6](https://th0ar.gitbooks.io/xv6-chinese/content/content/chapter2.html) |
+| xv6文档                  | [xv6](https://xv6-guide.github.io/xv6-riscv-book) [xv6中文](https://th0ar.gitbooks.io/xv6-chinese/content/content/chapter2.html)|
 | posix函数查询             | [posix](https://man7.org/linux/man-pages/) |
 | CS自学指南-NIT6.S081      | [CS自学指南](https://csdiy.wiki/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/MIT6.S081/) |
 
@@ -28,7 +28,10 @@ cd xv6-labs-2024
 make qemu
 ```
 
-### lab1 [util](https://pdos.csail.mit.edu/6.828/2024/labs/util.html)
+<details>
+    <summary><h3>lab1 util</h3></summary>
+
+- https://pdos.csail.mit.edu/6.828/2024/labs/util.html
 
 #### 1. sleep (easy) [代码参考](./xv6-labs-2024/lab1:%20util/1.%20sleep/sleep.c)
 ```
@@ -219,7 +222,12 @@ C字符串需要以\0结尾 但标准输入的原始字节流不包含\0 而是�
 - 标准输入的内容根据\n划分 然后依次执行
 ![xargs](./doc/mit6.s081/xargs.jpeg)
 
-## 2. mit6.824 [syscall](https://pdos.csail.mit.edu/6.828/2024/labs/syscall.html)
+</details>
+
+<details>
+    <summary><h3>lab2 syscall</h3></summary>
+
+- https://pdos.csail.mit.edu/6.828/2024/labs/syscall.html
 
 #### gdb使用
 
@@ -246,3 +254,62 @@ user/attack.c 中的secret最终分配到了那个页表上
 1. 按提示把页表清空部分都注释了
 2. 根据页表的分配知道最终使用了那一块
 ```
+
+</details>
+
+<details>
+    <summary><h3>lab3 page tables</h3></summary>
+
+- https://pdos.csail.mit.edu/6.828/2024/labs/pgtbl.html
+
+#### 1. Inspect a user-process page table (easy) [pte转pa](./xv6-labs-2024/lab3:%20page%20tables/1.%20Inspect%20a%20user-process%20page%20table)
+
+```
+打印pgtbltest进程的前10页和后10页的页表项并解释
+```
+
+| 标志位 | 位索引 | 名称（英文） | 作用描述 |
+| --- | --- | --- | --- |
+| PTE_V | 0 | Valid | 有效位 1:有效 0:无效|
+| PTE_R | 1 | Read | 读权限 1:有效 0:无效|
+| PTE_W | 2 | Write | 写权限 1:有效 0:无效 仅当PTE_V = 1时有效，需与PTE_R配合|
+| PTE_X | 3 | Execute | 执行权限 置1允许将页面视为代码执行 用于区分代码和数据页面 |
+| PTE_U | 4 | User | 控制用户态访问权限 1:允许用户态访问  |
+| PTE_G | 5 | Global | 表示全局映射 置1表示该PTE对所有地址空间有效（xv6中忽略) |
+| PTE_A | 6 | Accessed | 硬件置1表示页面被访问（读/写/取指）xv6中可用于页面替换优化 |
+| PTE_D | 7 | Dirty | 硬件置1表示页面被写入（脏页 xv6中可用于写回策略或写时复制 |
+| PTE_RSW | 8-9 | Reserved for Software | 保留给软件使用 xv6中可自定义（如用于写时复制或页面状态跟踪)|
+
+
+- 参考文章 [理解 RISC-V 上的 xv6 中的页表](https://cs326-s25.cs.usfca.edu/guides/page-tables)
+
+打印的结果
+```
+va 0x0 pte 0x21FCD85B pa 0x87F36000 perm 0x5B
+va 0x1000 pte 0x21FD1417 pa 0x87F45000 perm 0x17
+va 0x2000 pte 0x21FD1007 pa 0x87F44000 perm 0x7
+va 0x3000 pte 0x21FD40D7 pa 0x87F50000 perm 0xD7
+...
+va 0xFFFFD000 pte 0x0 pa 0x0 perm 0x0
+va 0xFFFFE000 pte 0x21FC8CC7 pa 0x87F23000 perm 0xC7
+va 0xFFFFF000 pte 0x2000184B pa 0x80006000 perm 0x4B
+```
+
+解释说明
+```
+va: 虚拟地址 pte: 页表项 pa: 物理地址 perm: 权限位
+如条目2
+va 0x1000 pte 0x21FD1417 pa 0x87F45000 perm 0x17
+0x21FD1417 = PPN(44) + Perm(10) = 0x87F45 + 0x17
+0x17 = 00010111
+位 0（V）：1 有效
+位 1（R）：1 可读
+位 2（W）：1 可写
+位 3（X）：0 不可作为代码执行
+位 4（U）：1 允许用户态访问
+位 5（G）：0 非全局
+位 6（A）：0 未访问
+位 7（D）：0 未修改
+```
+
+</details>
