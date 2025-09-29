@@ -1,6 +1,6 @@
 # 个人mit实验记录
 
-## 1. mit6.s081
+## 一. mit6.s081
 
 - 参考资料
 
@@ -311,5 +311,19 @@ va 0x1000 pte 0x21FD1417 pa 0x87F45000 perm 0x17
 位 6（A）：0 未访问
 位 7（D）：0 未修改
 ```
+
+#### 2. speed up system calls (easy) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/2.%20speed%20up%20system%20page%20calls)
+
+```
+调用pid的时候 从用户态调用 进程创建后 映射到USYSCALL (kernel.proc.c proc_pagetable函数)
+存储一个usyscall结构体 初始化当前进程的pid (kernel.proc.c allocproc函数)
+```
+
+流程如下
+1. allocproc 分配物理内存
+2. proc_pagetable 创建虚拟地址和物理内存地址的映射关系
+3. freeproc 释放进程资源并重置状态
+4. proc_freepagetable 接触虚拟地址和物理内存地址的关系 经过如下流程释放页表的物理内存
+proc_freepagetable -> uvmfree -> freewalk -> kfree((void*)pagetable);
 
 </details>
