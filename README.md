@@ -312,7 +312,7 @@ va 0x1000 pte 0x21FD1417 pa 0x87F45000 perm 0x17
 位 7（D）：0 未修改
 ```
 
-#### 2. speed up system calls (easy) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/2.%20speed%20up%20system%20page%20calls)
+#### 2. Speed up system calls (easy) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/2.%20speed%20up%20system%20page%20calls)
 
 ```
 调用pid的时候 从用户态调用 进程创建后 映射到USYSCALL (kernel.proc.c proc_pagetable函数)
@@ -326,4 +326,30 @@ va 0x1000 pte 0x21FD1417 pa 0x87F45000 perm 0x17
 4. proc_freepagetable 接触虚拟地址和物理内存地址的关系 经过如下流程释放页表的物理内存
 proc_freepagetable -> uvmfree -> freewalk -> kfree((void*)pagetable);
 
+#### 3. Print a page table (easy) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/2.%20print%20a%20page%20table)
+
+```
+实现vmprint（kernel.vm.c文件中) 打印va（虚拟地址) pte(页表项) pa(物理地址)
+```
+
+默认没有测试 因此在exec.c中添加如下代码主动调用 make qemu时自动测试
+```
+int
+exec(char *path, char **argv)
+{ ...
+  if (p->pid == 1) {
+      vmprint(p->pagetable);  // 这会打印 init 进程的页表
+  }
+  return argc;
+  ...
+}
+```
+
+- 虚拟地址格式如下 可以使用PXSHIFT宏获取偏移
+```
+| VPN[2] (9 bits) | VPN[1] (9 bits) | VPN[0] (9 bits) | Page Offset (12 bits) |
+
+vpn2（30-38位) vpn1 (21-29位) vpn0 (12-20位)
+PXSHIFT宏 输入2输出30 输入1输出21 输入0输出12
+```
 </details>
