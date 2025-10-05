@@ -1,6 +1,6 @@
 # 个人mit实验记录
 
-## 一. mit6.s081
+## 一. mit6.s081 [2024]
 
 - 参考资料
 
@@ -373,4 +373,132 @@ make grade 测试失败的情况和解决方案
 ```
 
 ![最终成绩](./doc/mit6.s081/lab3-result.png)
+</details>
+
+
+<details>
+    <summary><h3>lab4 traps</h3></summary>
+
+- https://pdos.csail.mit.edu/6.828/2024/labs/traps.html
+
+#### 1. RISC-V assembly (easy) [内联和不内联的call.asm](./xv6-labs-2024/lab4:%20traps/1.%20risc-v%20assembly)
+
+```
+1. Which registers contain arguments to functions? For example, which register holds 13 in main's call to printf?
+哪些寄存器包含函数的参数？例如，在 main 函数调用 printf 时，哪个寄存器保存的是 13？ (文件是/user/call.c)
+```
+
+```
+2. Where is the call to function f in the assembly code for main? Where is the call to g? (Hint: the compiler may inline functions.)
+在 main 函数的汇编代码中，对函数 f 的调用在哪里？对函数 g 的调用又在哪里？（提示：编译器可能会内联函数。）
+```
+
+```
+3. At what address is the function printf located?
+函数 printf 位于什么地址？
+```
+
+```
+4. What value is in the register ra just after the jalr to printf in main?
+在 main 中，紧接着 jalr 到 printf 之后，寄存器 ra 中的值是什么？
+```
+
+![riscv-abi](./doc/mit6.s081/riscv-abi.png)
+
+- 图片来源: RSD架构 资源池 risc架构[转载] https://blog.51cto.com/u_16213722/8400291
+
+```
+make fs.img
+在生成的./user/call.asm中发现是a2寄存器
+```
+
+![lab4-gdb.png](./doc/mit6.s081/lab4-gdb.png)
+
+- 回答问题1-4
+```
+# 终端启动一个窗口A
+make qemu-gdb
+在一个窗口 直到出现 -gdb tcp::25501 (不一定端口是这个)
+
+终端启动另一个窗口B
+
+# 在本地启动GDB调试器
+gdb
+
+# 查看当前工作目录（确认文件路径是否正确）
+pwd
+
+# 加载需要调试的目标文件（此处为./user/_call）
+file ./user/_call
+
+# 切换到分割窗口布局（同时显示代码和命令行，方便调试）
+layout split
+
+# 在main函数入口处设置断点
+b main
+
+# 在窗口A运行
+call
+
+# 运行程序（程序会执行到main函数的断点处暂停）
+c
+
+# 查看./user/call.asm
+b *0x34
+c
+
+# 执行当前汇编指令 如果是函数调用则会进入函数内部(不进入函数内部的话是ni) 单步执行汇编指令（Step Instruction）
+si
+
+# 查看当前寄存器的值情况
+info r
+可以观察到 a2 0xd 13 (问题1答案)
+
+观察call.asm 发现没有显示 被内联了 （问题2答案)
+可以取消内联 在makefile文件里面添加 -fno-inline
+CFLAGS = -Wall -Werror -O -fno-inline -fno-omit-frame-pointer -ggdb -gdwarf-2
+make clean后重新生成
+顺序如下 jal	12 <f> -> 调用f函数 -> jal 0 <g> -> g函数
+
+非内联的情况 (问题3答案)
+jal	712 <printf>
+
+x/3i 0x712
+   0x712 <printf>:	addi	sp,sp,-96
+   0x714 <printf+2>:	sd	ra,24(sp)
+   0x716 <printf+4>:	sd	s0,16(sp)
+
+i r ra (问题4答案)
+    ra             0x46	0x46 <main+32>
+最终执行main函数的如下 修改a0的值
+46:	4501                	li	a0,0
+```
+
+```
+5. Run the following code.
+运行以下代码。
+    nsigned int i = 0x00646c72;
+	printf("H%x Wo%s", 57616, (char *) &i);
+What is the output? Here's an ASCII table that maps bytes to characters.
+输出是什么？ ascll表参考 https://www.asciitable.com/
+
+The output depends on that fact that the RISC-V is little-endian. If the RISC-V were instead big-endian what would you set i to in order to yield the same output? Would you need to change 57616 to a different value?
+输出取决于 RISC-V 是否采用小端模式。如果 RISC-V 采用大端模式，你会将 i 设置为多少才能得到相同的输出？ 你需要改变 57616 为不同的值？
+
+0x64=d 0x6c=l 0x72=r 输出hello world 0x00是c字符串的结尾
+大端的话 换一下位置 726c4600
+
+```
+
+- c99标准 https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf
+
+```
+6. In the following code, what is going to be printed after 'y='? (note: the answer is not a specific value.) Why does this happen?
+在下面的代码中，打印的内容 'y=' ?（注意：答案不是一个具体的值。）为什么這樣會發生嗎？
+
+printf("x=%d y=%d", 3);
+y后面的值是获取的a2 这里没有指定的话 就未知了
+c99标准里面说明是未定义的 如下文档 274页
+If there are insufficient arguments for the format, the behavior is undefined.
+```
 </details>
