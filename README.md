@@ -326,7 +326,7 @@ va 0x1000 pte 0x21FD1417 pa 0x87F45000 perm 0x17
 4. proc_freepagetable 接触虚拟地址和物理内存地址的关系 经过如下流程释放页表的物理内存
 proc_freepagetable -> uvmfree -> freewalk -> kfree((void*)pagetable);
 
-#### 3. Print a page table (easy) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/2.%20print%20a%20page%20table)
+#### 3. Print a page table (easy) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/3.%20print%20a%20page%20table)
 
 ```
 实现vmprint（kernel.vm.c文件中) 打印va（虚拟地址) pte(页表项) pa(物理地址)
@@ -352,4 +352,25 @@ exec(char *path, char **argv)
 vpn2（30-38位) vpn1 (21-29位) vpn0 (12-20位)
 PXSHIFT宏 输入2输出30 输入1输出21 输入0输出12
 ```
+
+#### 4. Use superpages (moderate)/(hard) [代码参考](./xv6-labs-2024/lab3:%20page%20tables/4.%20use%20superpages)
+
+```
+实现超级页 大小为2mb
+```
+
+- 2mb = 2的21次方 相当于VPN[1] + VPN[0] + Offset 即L1的pte直接指向超级页
+- 修改pgtbltest的测试 单独支持超级页测试
+
+```
+make grade 测试失败的情况和解决方案
+1. sbrkmuch失败
+需要管理好超级页和普通页的申请和释放情况 主要问题是申请的最新是超级页 然后释放了普通页的处理
+目前取巧 选择如下方案
+申请超过50个超级页 （避免处理超级页不够的情况）
+在sbrk函数上管理使用的超级页和普通页情况
+2. 边界条件未考虑 trap了 根据提示处理0xd 0xf
+```
+
+![最终成绩](./doc/mit6.s081/lab3-result.png)
 </details>
