@@ -501,4 +501,57 @@ y后面的值是获取的a2 这里没有指定的话 就未知了
 c99标准里面说明是未定义的 如下文档 274页
 If there are insufficient arguments for the format, the behavior is undefined.
 ```
+
+#### 2. Backtrace (moderate) [代码参考](./xv6-labs-2024/lab4:%20traps/2.%20backtrace)
+
+```
+在 kernel/printf.c 中实现backtrace()函数 (打印函数调用栈的地址 从当前栈打印到第一个栈)
+```
+
+- 使用PGROUNDDOWN(fp) （参见 kernel/riscv.h ）确定栈帧的指针边界
+- 如图所示 fp-8就是当前的栈地址 fp-16就是上一个栈的栈帧的指针 (fp-16)-8就是上一个栈地址
+
+```
++----------------------+  <-- 高地址
+|  第7个及以后的参数    |  [rbp + 16]  (前6个参数通过寄存器传递)
+|  (如果有更多参数)     |  [rbp + 24], [rbp + 32], ...
++----------------------+ [fp] 当前的
+|  Return Address      |  [rbp + 8]   (函数返回后要执行的下一条指令地址)
++----------------------+
+|  To Prev. Frame (fp) |  [rbp]       (指向上一个栈帧的fp，即旧rbp值)
++----------------------+
+|  Saved Registers     |  [rbp - 8]   (如%rbx的值)
+|                      |  [rbp - 16]  (如%rbp的值)
+|                      |  [rbp - 24]  (如%r12的值)
+|                      |  [rbp - 32]  (如%r13的值)
+|                      |  [rbp - 40]  (如%r14的值)
+|                      |  [rbp - 48]  (如%r15的值)
++----------------------+
+|  Local Variables     |  [rbp - 56]  (第一个局部变量，如int a)
+|                      |  [rbp - 64]  (第二个局部变量，如char b[8])
++----------------------+
+|  临时空间/缓冲区      |  [rbp - 72]  (如表达式计算的临时数据)
+|                      |  [rbp - 80]  (如函数调用的临时参数)
++----------------------+  <-- 低地址（栈顶，由rsp指针指向）
+```
+
+打印的结果
+```
+$ bttest
+backtrace:
+0x0000000080001df6
+0x0000000080001ca8
+0x0000000080001a32
+```
+
+```
+% riscv64-unknown-elf-addr2line -e kernel/kernel
+0x0000000080001df6
+/Users/GolandProjects/me/xv6-labs-2024/kernel/sysproc.c:71
+0x0000000080001ca8
+/Users/GolandProjects/me/xv6-labs-2024/kernel/syscall.c:141 (discriminator 1)
+0x0000000080001a32
+/Users/GolandProjects/me/xv6-labs-2024/kernel/trap.c:76
+```
+
 </details>
