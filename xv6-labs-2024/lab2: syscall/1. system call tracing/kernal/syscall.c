@@ -70,7 +70,7 @@ syscall(void)
     p->trapframe->a0 = syscalls[num]();
     int mask = 1 << num;
     if (p->traceid & mask) {
-        printf("%d: syscall %s -> %lu\n",
+        printf("%d: syscall %s -> %ld\n",
                 p->pid, names[num-1], p->trapframe->a0);
     }
   } else {
