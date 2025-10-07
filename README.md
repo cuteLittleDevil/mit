@@ -554,4 +554,26 @@ backtrace:
 /Users/GolandProjects/me/xv6-labs-2024/kernel/trap.c:76
 ```
 
+#### 3. Alarm (hard)  [代码参考](./xv6-labs-2024/lab4:%20traps/3.%20alarm)
+
+```
+添加功能 让进程使用CPU时间定期执行函数
+```
+
+```
+trap有三种情况
+1. 执行了系统调用的函数 如write
+2. 程序出现了异常 如除0 缺页等
+3. 设备触发了中断 如键盘上敲击
+xv6-riscv 中 devintr()的返回值
+0：未识别或未处理的中断/异常（not recognized）。这通常表示发生了异常（如页故障、非法指令）或其他不支持的中断
+1：成功处理了外部设备中断（other device 通过 PLIC（Platform-Level Interrupt Controller）查询中断源（如UART或VirtIO磁盘
+2：成功处理了定时器中断（timer interrupt）这允许上层函数（如 usertrap()）知道需要调用 yield() 进行进程切换，实现时间片轮转
+
+https://github.com/mit-pdos/xv6-riscv/blob/riscv/kernel/trap.c
+```
+
+- test2的测试是函数在执行过程中 拒绝掉新执行的
+- test3的测试是保证寄存器a0的值不变 需要sys_sigreturn返回a0的值
+
 </details>
